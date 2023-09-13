@@ -19,10 +19,10 @@ import {
 } from "firebase/auth";
 import {
     collection,
+    getDocs,
     addDoc,
     query,
     where,
-    getDocs
 } from "firebase/firestore";
 import {
     getToken,
