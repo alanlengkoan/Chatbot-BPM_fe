@@ -21,7 +21,7 @@ import Loading from "./../Loading.vue";
                         </div>
                         <div class="flex items-center">
                             <button class="bg-blue-500 m-1 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg" @click="openChat(row.id)">Chat</button>
-                            <button class="bg-blue-500 m-1 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg" @click="reportFriend(row.id)">Report</button>
+                            <button v-if="row.status" class="bg-blue-500 m-1 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg" @click="reportFriend(row.uid)">Report</button>
                         </div>
                     </div>
                 </li>
@@ -49,9 +49,12 @@ import {
     getDocs,
     onSnapshot,
     orderBy,
-    or
+    or,
+    serverTimestamp,
+    addDoc
 } from "firebase/firestore";
 import { onUnmounted, ref } from 'vue';
+import Swal from 'sweetalert2';
 
 export default {
     name: 'Chats',
@@ -91,7 +94,7 @@ export default {
 
                 const unsubscribe = onSnapshot(qryFriends, (snapshotFrineds) => {                   
                     this.chats = [];
-                    snapshotFrineds.docs.map((docFriends) => {
+                    snapshotFrineds.docs.map(async (docFriends) => {
                         let user = null;
 
                         if (docFriends.data().id_sender == this.uid) {
@@ -100,13 +103,20 @@ export default {
                             user = this.users.find((row) => row.uid == docFriends.data().id_sender);
                         }
 
+                        // untuk ambil data report
+                        const tblReport = collection(db, "Reports");
+                        const qryReport = query(tblReport, where("uid_report", "==", this.uid));
+                        const resReport = await getDocs(qryReport);
+
                         this.chats.push({
                             id: docFriends.id,
                             seen: docFriends.data().seen,
                             latest_message: docFriends.data().latest_message,
+                            uid: user.uid,
                             name: user.name,
                             email: user.email,
                             photo: user.photo,
+                            status: (resReport.empty ? true : false)
                         });
                     });
                 });
@@ -118,8 +128,32 @@ export default {
                 console.log(error);
             }
         },
-        async reportFriend(id) {
-            alert(id);
+        async reportFriend(uid) {
+            try {
+                const tblReport = collection(db, 'Reports');
+
+                const data = {
+                    uid_report: this.uid,
+                    uid: uid,
+                    created_at: serverTimestamp(),
+                }
+
+                addDoc(tblReport, data).then((res) => {
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'Member berhasil direport',
+                        icon: 'success',
+                        confirmButtonText: 'Cool'
+                    }).then((confirm) => {
+                        if (confirm.isConfirmed) {
+                            console.log('Group Member berhasil ditambahkan => ' + res.id);
+                            this.loadChat();
+                        }
+                    });
+                });
+            } catch (error) {
+                console.log(error);
+            }
         },
     },
     mounted() {

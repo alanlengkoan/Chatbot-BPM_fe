@@ -28,6 +28,7 @@ import {
     getToken,
     onMessage
 } from "firebase/messaging";
+import Swal from 'sweetalert2';
 
 const provider = new GoogleAuthProvider();
 
@@ -81,6 +82,7 @@ export default {
                     email: this.email,
                     photo: this.photoURL,
                     role: 'user',
+                    active: 'y',
                     token_notification: this.tokenNotification,
                 }
 
@@ -106,9 +108,11 @@ export default {
                 } else {
                     console.log('Collection does exist');
 
-                    const qryUsers = query(collection(db, "Users"), where("uid", "==", this.uid));
-                    const get = await getDocs(qryUsers);
-                    if (get.size == 0) {
+                    const tblUsers = collection(db, "Users");
+                    const qryUsers = query(tblUsers, where("uid", "==", this.uid));
+                    const getUsers = await getDocs(qryUsers);
+
+                    if (getUsers.size == 0) {
                         // untuk simpan data ke firebase
                         const docRef = await addDoc(collection(db, "Users"), data);
                         if (docRef) {
@@ -123,12 +127,25 @@ export default {
                             console.log('Create data users gagal ' + docRef.id);
                         }
                     } else {
-                        // untuk set local storage
-                        localStorage.setItem('authenticated', true);
-                        localStorage.setItem('user', JSON.stringify(data));
-                        this.$router.push({
-                            name: 'user'
-                        });
+                        // untuk cek active
+                        const qryUserCheck = query(tblUsers, where("uid", "==", this.uid), where("active", "==", 'y'));
+                        const getUserCheck = await getDocs(qryUserCheck);
+
+                        if (getUserCheck.size == 0) {
+                            Swal.fire({
+                                title: 'Gagal!',
+                                text: 'Maaf, akun Anda telah diblock!',
+                                icon: 'error',
+                                confirmButtonText: 'Okay'
+                            });
+                        } else {
+                            // untuk set local storage
+                            localStorage.setItem('authenticated', true);
+                            localStorage.setItem('user', JSON.stringify(data));
+                            this.$router.push({
+                                name: 'user'
+                            });
+                        }
                     }
                 }
             }).catch((error) => {
