@@ -34,9 +34,22 @@
 </template>
 
 <script>
-import { collection, doc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
-import { db } from "../../firebase";
+import {
+    collection,
+    doc,
+    onSnapshot,
+    query,
+    updateDoc,
+    where
+} from "firebase/firestore";
+import {
+    auth,
+    db
+} from "../../firebase";
 import Swal from "sweetalert2";
+import {
+    signInWithEmailAndPassword
+} from "firebase/auth";
 
 export default {
     name: 'Profil',
@@ -63,46 +76,76 @@ export default {
 
         },
         async updateProfil() {
-            const tblUsers = collection(db, "Users");
-            const qryUsers = query(tblUsers, where("uid", "==", this.uid));
+            Swal.fire({
+                title: 'Silahkan masukkan password!',
+                input: 'password',
+                inputPlaceholder: 'Enter your name here...',
+                confirmButtonText: 'Okay',
+                showCloseButton: true,
+            }).then((confirm) => {
+                if (confirm.value === '') {
+                    return;
+                }
 
-            onSnapshot(qryUsers, (snapshotUsers) => {
-                snapshotUsers.docs.map(async (docUsers) => {
-                    const docRef = doc(db, "Users", docUsers.id);
-                    updateDoc(docRef, {
-                        name: this.$refs.name.value,
-                        bio: this.$refs.bio.value
-                    }).then(() => {
-                        Swal.fire({
-                            title: 'Berhasil!',
-                            text: 'Selamat, akun Anda telah diubah!',
-                            icon: 'success',
-                            confirmButtonText: 'Okay'
-                        }).then((confirm) => {
-                            if (confirm.isConfirmed) {
-                                let data = {
-                                    uid: this.uid,
+                signInWithEmailAndPassword(auth, this.email, confirm.value).then(
+                    (userCredential) => {
+                        const tblUsers = collection(db, "Users");
+                        const qryUsers = query(tblUsers, where("uid", "==", this.uid));
+
+                        onSnapshot(qryUsers, (snapshotUsers) => {
+                            snapshotUsers.docs.map(async (docUsers) => {
+                                const docRef = doc(db, "Users", docUsers.id);
+                                updateDoc(docRef, {
                                     name: this.$refs.name.value,
-                                    email: this.email,
-                                    photo: this.photoURL,
-                                    bio: this.$refs.bio.value,
-                                    role: 'user',
-                                    active: 'y',
-                                    token_notification: this.token_notification,
-                                }
+                                    bio: this.$refs.bio.value
+                                }).then(() => {
+                                    Swal.fire({
+                                        title: 'Berhasil!',
+                                        text: 'Selamat, akun Anda telah diubah!',
+                                        icon: 'success',
+                                        confirmButtonText: 'Okay'
+                                    }).then((confirm) => {
+                                        if (confirm.isConfirmed) {
+                                            let data = {
+                                                uid: this.uid,
+                                                name: this.$refs.name.value,
+                                                email: this.email,
+                                                photo: this.photoURL,
+                                                bio: this.$refs.bio.value,
+                                                role: 'user',
+                                                active: 'y',
+                                                token_notification: this.token_notification,
+                                            }
 
-                                localStorage.removeItem('user');
-                                localStorage.setItem('user', JSON.stringify(data));
-                            }
+                                            localStorage.removeItem('user');
+                                            localStorage.setItem('user', JSON.stringify(data));
+                                        }
+                                    });
+                                }).catch((error) => {
+                                    Swal.fire({
+                                        title: 'Gagal!',
+                                        text: error,
+                                        icon: 'error',
+                                        confirmButtonText: 'Okay'
+                                    });
+                                });
+                            });
                         });
                     }).catch((error) => {
-                        Swal.fire({
-                            title: 'Gagal!',
-                            text: error,
-                            icon: 'error',
-                            confirmButtonText: 'Okay'
-                        });
-                    });
+                    const errorCode = error.code;
+                    switch (errorCode) {
+                        case 'auth/wrong-password':
+                            Swal.fire({
+                                title: 'Gagal!',
+                                text: 'Sorry, Password salah!',
+                                icon: 'error',
+                                confirmButtonText: 'Okay'
+                            });
+                            break;
+                        default:
+                            alert('Terjadi kesalahan');
+                            break;
+                    }
                 });
             });
         }

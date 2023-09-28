@@ -24,6 +24,7 @@ import UserAdminView from '../views/admin/User.vue'
 import ChatAdminView from '../views/admin/Chat.vue'
 import GroupAdminView from '../views/admin/Group.vue'
 import BotAdminView from '../views/admin/Bot.vue'
+import BotDetailAdminView from '../views/admin/BotDetail.vue'
 import BaseAdminLayout from '../layouts/BaseAdmin.vue'
 // end:: admin
 
@@ -168,6 +169,12 @@ const router = createRouter({
                     path: 'bot',
                     name: 'admin-bot',
                     component: BotAdminView,
+                },
+                {
+                    path: 'bot/detail/:id',
+                    name: 'admin-bot-detail',
+                    component: BotDetailAdminView,
+                    props: true,
                 },
             ]
         },

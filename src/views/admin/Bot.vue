@@ -15,6 +15,7 @@ import Breadcrumb from "../../components/admin/Breadcrumb.vue";
                     <th>User</th>
                     <th>Name</th>
                     <th>Info</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -23,6 +24,9 @@ import Breadcrumb from "../../components/admin/Breadcrumb.vue";
                     <td>{{ row.user }}</td>
                     <td>{{ row.name }}</td>
                     <td>{{ row.info }}</td>
+                    <td>
+                        <button class="bg-green-500 btn-sm hover:bg-green-700 text-white font-medium px-3 py-2 rounded-lg" @click="detailChat(row.id)">Detail</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -52,6 +56,14 @@ export default {
         }
     },
     methods: {
+        detailChat(id) {
+            this.$router.push({
+                name: 'admin-bot-detail',
+                params: {
+                    id: id
+                }
+            });
+        },
         async getData() {
             // untuk ambil data users
             const tblUsers = query(collection(db, 'Users'));
