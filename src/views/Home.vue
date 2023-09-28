@@ -1,11 +1,18 @@
 <template>
     <div class="flex flex-col items-center justify-center w-screen min-h-screen bg-gray-100 text-gray-800">
-        <div class="flex flex-col flex-grow items-center justify-center w-full max-w-xl bg-white shadow-xl rounded-lg overflow-hidden">
+        <div
+            class="flex flex-col flex-grow items-center justify-center w-full max-w-xl bg-white shadow-xl rounded-lg overflow-hidden">
             <!-- begin:: body -->
             <h1 class="text-4xl font-bold text-gray-800 px-4 pb-5">Welcome to My Social Media</h1>
             <p class="text-gray-500">This is a My Social Media Network</p>
             <p class="text-gray-500">Login to continue</p>
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mt-5" @click="handleLogin">Login</button>
+
+            <div class="relative flex justify-between">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-1 py-2 px-4 rounded-full mt-5"
+                    @click="loginGoogle">Login with Google</button>
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-1 py-2 px-4 rounded-full mt-5"
+                    @click="loginEmail">Login with Email</button>
+            </div>
             <!-- end:: body -->
         </div>
     </div>
@@ -68,7 +75,12 @@ export default {
                 }
             });
         },
-        handleLogin() {
+        loginEmail() {
+            this.$router.push({
+                name: 'auth-login'
+            });
+        },
+        loginGoogle() {
             signInWithPopup(auth, provider).then(async (result) => {
                 // The signed-in user info.
                 this.uid = result.user.uid;

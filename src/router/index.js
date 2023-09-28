@@ -28,6 +28,8 @@ import BaseAdminLayout from '../layouts/BaseAdmin.vue'
 // end:: admin
 
 import HomeView from '../views/Home.vue'
+import AuthLoginView from '../views/auth/Login.vue'
+import AuthRegisterView from '../views/auth/Register.vue'
 import LoginView from '../views/Login.vue'
 import RegisterView from '../views/Register.vue'
 
@@ -48,6 +50,16 @@ const router = createRouter({
             path: '/register',
             name: 'register',
             component: RegisterView,
+        },
+        {
+            path: '/auth/login',
+            name: 'auth-login',
+            component: AuthLoginView,
+        },
+        {
+            path: '/auth/register',
+            name: 'auth-register',
+            component: AuthRegisterView,
         },
 
         // begin:: user
