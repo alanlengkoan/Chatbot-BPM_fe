@@ -7,7 +7,7 @@
     </div>
     <div class="flex flex-col flex-grow items-center justify-center">
         <h1 class="text-4xl font-bold text-gray-800 px-4 pb-5">Profil</h1>
-        <img class="object-cover w-50 h-50 rounded-full" :src="photoURL" :alt="nama" />
+        <img class="object-cover w-50 h-50 rounded-full" :src="photoURL" :alt="nama" width="100" height="100" />
         <p class="text-gray-500">{{ nama }}</p>
         <p class="text-gray-500">{{ email }}</p>
         <p class="text-gray-500">{{ bio }}</p>
@@ -43,10 +43,10 @@ export default {
             let user = JSON.parse(localStorage.getItem('user'));
 
             this.uid = user.uid;
-            this.bio = user.bio;
+            this.bio = user.bio || '-';
             this.nama = user.name;
             this.email = user.email;
-            this.photoURL = user.photo;
+            this.photoURL = user.photo ?? 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';;
         },
         handleLogout() {
             signOut(auth).then(() => {
